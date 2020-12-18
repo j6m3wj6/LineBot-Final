@@ -31,7 +31,7 @@ namespace LineBot.Controllers
             {
                 body = await bodyReader.ReadToEndAsync();
                 var ReceivedMessage = isRock.LineBot.Utility.Parsing(body);
-                string Message = "你說了:" + ReceivedMessage.events[0].message.text;
+                string Message = "You say:" + ReceivedMessage.events[0].message.text;
 
                 isRock.LineBot.Utility.ReplyMessage(ReceivedMessage.events[0].replyToken, Message, ChannelAccessToken);
                 // 將 HTTP Request 的 Stream 起始位置歸零
