@@ -13,7 +13,11 @@ namespace LineBot
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            //CreateHostBuilder(args).Build().Run();
+
+            LineBotBasic.main();
+
+
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

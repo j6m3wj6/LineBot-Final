@@ -49,6 +49,7 @@ namespace LineBot
 
             app.UseEndpoints(endpoints =>
             {
+                
                 endpoints.MapControllers();
                 //endpoints.MapPost("/api/linebot", async context =>
                 //{
@@ -78,10 +79,10 @@ namespace LineBot
 
 
                 //});
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
+                //endpoints.MapGet("/", async context =>
+                //{
+                //    await context.Response.WriteAsync("Hello World!");
+                //});
             });
             
         }
