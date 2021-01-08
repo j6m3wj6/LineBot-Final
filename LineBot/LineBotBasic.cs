@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using LineBot.Models;
 using LineBot.Repositories;
+using Newtonsoft.Json;
 using MongoDB.Driver;
 using MongoDB.Bson;
 
@@ -31,20 +32,10 @@ namespace LineBot
             //liffApp();
             //richMenu();
             */
-            string[] classes1 = { "phys_A1", "math_B4" };
-            string[] classes2 = { "phys_A1", "engilsh_C2" };
 
-            var newUser1 = new User("User1", "stu_001", classes1);
-            var newUser2 = new User("User2", "stu_002", classes2);
-            var newUser3 = new User("User3", "stu_003", classes2);
-            var newUser4 = new User("User4", "stu_004", classes2);
-            var newUser5 = new User("User5", "stu_005", classes1);
-            var newUser6 = new User("User6", "stu_006", classes2);
 
-            newUser1.info();
-            Update();
+            Receive();
 
-            //Receive();
             Console.WriteLine("End of LineBotBasic");
             
         }
@@ -71,17 +62,74 @@ namespace LineBot
             data.Add(newUser6);
             _users.InsertMany(data);
         }
+
+        public void SerializeNutrients()
+        {
+            var root = new BsonDocument() { { "nutrients", new BsonDocument() } };
+            foreach (var nutrient in this.Nutrients)
+            {
+                if (string.IsNullOrWhiteSpace(nutrient.Definition.TagName))
+                {
+                    continue;
+                }
+                root["nutrients"][nutrient.Definition.TagName] =
+                  new BsonDocument() {
+                    {"id", nutrient.NutrientId},
+                    {"amount", nutrient.AmountInHundredGrams},
+                    {"description", nutrient.Definition.Description},
+                    {"uom", nutrient.Definition.UnitOfMeasure},
+                    {"sortOrder", nutrient.Definition.SortOrder}
+                  };
+            }
+            this.NutrientDoc = root;
+        }
+
+
+        public void DeserializeUsers(string tag = null)
+        {
+            var elements = this.NutrientDoc["nutrients"].AsBsonDocument;
+            var list = new List<User>();
+            foreach (var element in elements.Elements)
+            {
+                if (!string.IsNullOrWhiteSpace(tag))
+                {
+                    if (element.Name != tag)
+                    {
+                        continue;
+                    }
+                }
+                var nutrient = new Nutrient
+                {
+                    FoodId = this.FoodId,
+                    NutrientId = element.Value.AsBsonDocument["id"].AsString,
+                    AmountInHundredGrams = element.Value.AsBsonDocument["amount"].ToDouble(),
+                    Definition = new NutrientDefinition
+                    {
+                        NutrientId = element.Value.AsBsonDocument["id"].AsString,
+                        UnitOfMeasure = element.Value.AsBsonDocument["uom"].AsString,
+                        Description = element.Value.AsBsonDocument["description"].AsString,
+                        TagName = element.Name,
+                        SortOrder = element.Value.AsBsonDocument["sortOrder"].AsInt32
+                    }
+                };
+                list.Add(nutrient);
+            }
+            this.Nutrients = list.ToArray();
+        }
         public static void Receive()
         {
-            string result1 = string.Empty;
-            var cursor1 = _users.Find(user => true).ToCursor();
-            foreach (var document in cursor1.ToEnumerable())
-            {
-                //Console.WriteLine(document);
-                result1 += document.ToJson();
-                result1 += "\n";
-            }
-            Console.WriteLine(result1);
+            //string result1 = string.Empty;
+            //var cursor1 = _users.Find(user => true).ToCursor();
+            //foreach (var document in cursor1.ToEnumerable())
+            //{
+            //    //Console.WriteLine(document);
+            //    result1 += document.ToJson();
+            //    result1 += "\n";
+            //}
+            //Console.WriteLine(result1);
+            var firstDocument = _users.Find(new BsonDocument()).FirstOrDefault().ToJson();
+            Console.WriteLine(firstDocument);
+            Console.WriteLine(BsonSerializer.Deserialize<User>(firstDocument));
         }
         public static void Delete()
         {

@@ -9,23 +9,14 @@ namespace LineBot.Repositories
 {
     public class UsersServicies
     {
-        private readonly IMongoCollection<BsonDocument> _users;
+        private readonly IMongoCollection<User> _users;
 
         public UsersServicies() //IUsersDatabaseSettings settings
         {
             var client = new MongoClient("mongodb+srv://j6m3wj6:0000@cluster0.gnphr.mongodb.net/LineBotCramSchool?retryWrites=true&w=majority");
             var database = client.GetDatabase("LineBotCramSchool");
             Console.Write("UsersServicies initialize", database);
-            _users = database.GetCollection<BsonDocument>("Users");
-            //var document = new BsonDocument {
-            //    { "UserName", "Test" }
-            //};
-            //_users.InsertOne(document);
-            //var coll = database.GetCollection<User>("Users");  //指定寫入給"categories"此collection,但我們的資料型態是Category  
-            //List<User> data = new List<User>();
-            //data.Add(new User { UserName = "Test1" });
-            //data.Add(new User { UserName = "Test2" });
-            //coll.InsertMany(data);
+            _users = database.GetCollection<User>("Users");
             
         }
 

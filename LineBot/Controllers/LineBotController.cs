@@ -39,12 +39,12 @@ namespace LineBot.Controllers
                 Message += ("\nUserInfo-displayName: "+ bot.GetUserInfo(UserId).displayName);
 
                 isRock.LineBot.Utility.ReplyMessage(ReceivedMessage.events[0].replyToken, Message, ChannelAccessToken);
-                // 將 HTTP Request 的 Stream 起始位置歸零
-                //Request.Body.Position = 0;
 
                 return Ok();
             }
         }
+
+
         // GET: /<controller>/
         //public IActionResult Index()
         //{
