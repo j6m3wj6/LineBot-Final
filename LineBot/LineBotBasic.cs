@@ -1,7 +1,10 @@
 ﻿using isRock.LineBot;
 using System;
 using System.Collections.Generic;
-
+using LineBot.Models;
+using LineBot.Repositories;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace LineBot
 {
@@ -11,9 +14,13 @@ namespace LineBot
         static string AdminUserId = "Uee40dcf0ca8f874fe5c5b374edccd59b";
         static isRock.LineBot.Bot bot = new isRock.LineBot.Bot(ChannelAccessToken);
 
+        static MongoClient client = new MongoClient("mongodb+srv://j6m3wj6:0000@cluster0.gnphr.mongodb.net/LineBotCramSchool?retryWrites=true&w=majority");
+        static IMongoDatabase database = client.GetDatabase("LineBotCramSchool");
+        static IMongoCollection<User> _users = database.GetCollection<User>("Users");
+
         public static void main()
         {
-
+            /*
             //text();
             //sticker();
             //picture();
@@ -22,9 +29,83 @@ namespace LineBot
             //carouselTemplate();
             //quickReply();
             //liffApp();
-            richMenu();
+            //richMenu();
+            */
+            string[] classes1 = { "phys_A1", "math_B4" };
+            string[] classes2 = { "phys_A1", "engilsh_C2" };
+
+            var newUser1 = new User("User1", "stu_001", classes1);
+            var newUser2 = new User("User2", "stu_002", classes2);
+            var newUser3 = new User("User3", "stu_003", classes2);
+            var newUser4 = new User("User4", "stu_004", classes2);
+            var newUser5 = new User("User5", "stu_005", classes1);
+            var newUser6 = new User("User6", "stu_006", classes2);
+
+            newUser1.info();
+            Update();
+
+            //Receive();
             Console.WriteLine("End of LineBotBasic");
+            
         }
+        public static void Create()
+        {
+            string[] classes1 = { "phys_A1", "math_B4" };
+            string[] classes2 = { "phys_A1", "engilsh_C2" };
+
+            var newUser1 = new User("User1", "stu_001", classes1);
+            var newUser2 = new User("User2", "stu_002", classes2);
+            var newUser3 = new User("User3", "stu_003", classes2);
+            var newUser4 = new User("User4", "stu_004", classes2);
+            var newUser5 = new User("User5", "stu_005", classes1);
+            var newUser6 = new User("User6", "stu_006", classes2);
+
+            //newUser1.info();
+
+            List<User> data = new List<User>();
+            data.Add(newUser1);
+            data.Add(newUser2);
+            data.Add(newUser3);
+            data.Add(newUser4);
+            data.Add(newUser5);
+            data.Add(newUser6);
+            _users.InsertMany(data);
+        }
+        public static void Receive()
+        {
+            string result1 = string.Empty;
+            var cursor1 = _users.Find(user => true).ToCursor();
+            foreach (var document in cursor1.ToEnumerable())
+            {
+                //Console.WriteLine(document);
+                result1 += document.ToJson();
+                result1 += "\n";
+            }
+            Console.WriteLine(result1);
+        }
+        public static void Delete()
+        {
+            //var deleteLowExamFilter = Builders<BsonDocument>.Filter.ElemMatch<BsonValue>("scores",
+            //     new BsonDocument { { "type", "exam" }, {"score", new BsonDocument { { "$lt", 60 }}}
+            //});
+            //collection.DeleteMany(deleteLowExamFilter);
+            var deleteFilter = Builders<User>.Filter.Eq("name", "User1");
+            _users.DeleteOne(deleteFilter);
+        }
+        public static void Update()
+        {
+            string[] classes1 = { "phys_A1", "math_B4" };
+            var filter = Builders<User>.Filter.Eq("name", "User3");
+            var update = Builders<User>.Update.Set("classes", classes1);
+            _users.UpdateOne(filter, update);
+            //var arrayFilter = Builders<User>.Filter.Eq("name", "User3")
+            //                 & Builders<User>.Filter.Eq("scores.type", "quiz");
+            //var arrayUpdate = Builders<User>.Update.Set("scores.$.score", 84.92381029342834);
+            //collection.UpdateOne(arrayFilter, arrayUpdate);
+        }
+
+
+
 
         public static void text()
         {
@@ -32,7 +113,7 @@ namespace LineBot
         }
         public static void sticker()
         {
-            bot.PushMessage(AdminUserId, 1, 12);
+            bot.PushMessage(AdminUserId, 1, 13);
         }
         public static void picture()
         {
@@ -116,7 +197,6 @@ namespace LineBot
 
             bot.PushMessage(AdminUserId, msg);
         }
-
         public static void liffApp()
         {
             //Liff format = "line://app/1655280488-PM2XpBMw";
@@ -126,7 +206,6 @@ namespace LineBot
             //Console.WriteLine(Liff);
             bot.PushMessage(AdminUserId, Liff);
         }
-
         public static void richMenu()
         {
             //建立RuchMenu
@@ -171,7 +250,6 @@ namespace LineBot
 
 
         }
-
 
         public LineBotBasic()
         {

@@ -14,6 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using LineBot.Middlewares;
+using LineBot.Models;
+using LineBot.Repositories;
+using Microsoft.Extensions.Options;
 
 namespace LineBot
 {
@@ -29,6 +32,14 @@ namespace LineBot
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // requires using Microsoft.Extensions.Options
+            //services.Configure<UsersDatabaseSettings>(
+            //    Configuration.GetSection(nameof(UsersDatabaseSettings)));
+
+            //services.AddSingleton<IUsersDatabaseSettings>(sp =>
+            //    sp.GetRequiredService<IOptions<UsersDatabaseSettings>>().Value);
+            //services.AddSingleton<UsersServicies>();
+
             services.AddControllers();
         }
 
@@ -79,10 +90,10 @@ namespace LineBot
 
 
                 //});
-                //endpoints.MapGet("/", async context =>
-                //{
-                //    await context.Response.WriteAsync("Hello World!");
-                //});
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync("Hello World!");
+                });
             });
             
         }

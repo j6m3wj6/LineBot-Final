@@ -8,9 +8,12 @@
   <ItemGroup>
     <PackageReference Include="LineBotSDK" Version="2.3.30" />
     <PackageReference Include="Line.Messaging" Version="1.4.5" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Middlewares\" />
+    <Folder Include="Models\" />
+    <Folder Include="Repositories\" />
   </ItemGroup>
 </Project>
