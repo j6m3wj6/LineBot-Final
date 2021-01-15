@@ -23,10 +23,18 @@ namespace LineBot.Controllers
         //    _usersServicies = usersServicies;
         //}
 
-        [HttpGet] //List<BsonDocument> //_usersServicies.Get()
-        public ActionResult<String> Get() =>
-             _usersServicies.Get();
 
+        [HttpGet] //List<BsonDocument> //_usersServicies.Get()
+        public ActionResult<String> Get()
+        {
+            List<USER> users = _usersServicies.Get();
+            string str = "";
+            foreach (var data in users)
+                str += data.info();
+
+            return "test";
+        }
+             
 
 
         //[HttpGet("{id:length(24)}", Name = "GetBook")]

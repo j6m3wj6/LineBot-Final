@@ -17,7 +17,7 @@ namespace LineBot
 
         static MongoClient client = new MongoClient("mongodb+srv://j6m3wj6:0000@cluster0.gnphr.mongodb.net/LineBotCramSchool?retryWrites=true&w=majority");
         static IMongoDatabase database = client.GetDatabase("LineBotCramSchool");
-        static IMongoCollection<User> _users = database.GetCollection<User>("Users");
+        static IMongoCollection<USER> _users = database.GetCollection<USER>("Users");
 
         public static void main()
         {
@@ -34,102 +34,48 @@ namespace LineBot
             */
 
 
+            //Create();
             Receive();
+            //DeleteAll();
+            Update();
 
             Console.WriteLine("End of LineBotBasic");
             
         }
         public static void Create()
         {
+
             string[] classes1 = { "phys_A1", "math_B4" };
             string[] classes2 = { "phys_A1", "engilsh_C2" };
 
-            var newUser1 = new User("User1", "stu_001", classes1);
-            var newUser2 = new User("User2", "stu_002", classes2);
-            var newUser3 = new User("User3", "stu_003", classes2);
-            var newUser4 = new User("User4", "stu_004", classes2);
-            var newUser5 = new User("User5", "stu_005", classes1);
-            var newUser6 = new User("User6", "stu_006", classes2);
+            var newUser1 = new USER("User1", "stu_001");
+            var newUser2 = new USER("User2", "stu_002");
+            var newUser3 = new USER("User3", "stu_003");
 
             //newUser1.info();
 
-            List<User> data = new List<User>();
+            List<USER> data = new List<USER>();
             data.Add(newUser1);
             data.Add(newUser2);
             data.Add(newUser3);
-            data.Add(newUser4);
-            data.Add(newUser5);
-            data.Add(newUser6);
             _users.InsertMany(data);
         }
 
-        public void SerializeNutrients()
-        {
-            var root = new BsonDocument() { { "nutrients", new BsonDocument() } };
-            foreach (var nutrient in this.Nutrients)
-            {
-                if (string.IsNullOrWhiteSpace(nutrient.Definition.TagName))
-                {
-                    continue;
-                }
-                root["nutrients"][nutrient.Definition.TagName] =
-                  new BsonDocument() {
-                    {"id", nutrient.NutrientId},
-                    {"amount", nutrient.AmountInHundredGrams},
-                    {"description", nutrient.Definition.Description},
-                    {"uom", nutrient.Definition.UnitOfMeasure},
-                    {"sortOrder", nutrient.Definition.SortOrder}
-                  };
-            }
-            this.NutrientDoc = root;
-        }
-
-
-        public void DeserializeUsers(string tag = null)
-        {
-            var elements = this.NutrientDoc["nutrients"].AsBsonDocument;
-            var list = new List<User>();
-            foreach (var element in elements.Elements)
-            {
-                if (!string.IsNullOrWhiteSpace(tag))
-                {
-                    if (element.Name != tag)
-                    {
-                        continue;
-                    }
-                }
-                var nutrient = new Nutrient
-                {
-                    FoodId = this.FoodId,
-                    NutrientId = element.Value.AsBsonDocument["id"].AsString,
-                    AmountInHundredGrams = element.Value.AsBsonDocument["amount"].ToDouble(),
-                    Definition = new NutrientDefinition
-                    {
-                        NutrientId = element.Value.AsBsonDocument["id"].AsString,
-                        UnitOfMeasure = element.Value.AsBsonDocument["uom"].AsString,
-                        Description = element.Value.AsBsonDocument["description"].AsString,
-                        TagName = element.Name,
-                        SortOrder = element.Value.AsBsonDocument["sortOrder"].AsInt32
-                    }
-                };
-                list.Add(nutrient);
-            }
-            this.Nutrients = list.ToArray();
-        }
         public static void Receive()
         {
-            //string result1 = string.Empty;
-            //var cursor1 = _users.Find(user => true).ToCursor();
-            //foreach (var document in cursor1.ToEnumerable())
-            //{
-            //    //Console.WriteLine(document);
-            //    result1 += document.ToJson();
-            //    result1 += "\n";
-            //}
+            List<USER> resData = new List<USER>();
+            var cursor1 = _users.Find(user => true).ToCursor();
+            foreach (var document in cursor1.ToEnumerable())
+            {
+                Console.WriteLine(document);
+                resData.Add(document);
+            }
+            foreach (var data in resData)
+                data.info();
             //Console.WriteLine(result1);
-            var firstDocument = _users.Find(new BsonDocument()).FirstOrDefault().ToJson();
-            Console.WriteLine(firstDocument);
-            Console.WriteLine(BsonSerializer.Deserialize<User>(firstDocument));
+            //var firstDocument = _users.Find(new BsonDocument()).FirstOrDefault().ToJson();
+            //Console.WriteLine(firstDocument);
+            //Console.WriteLine(BsonSerializer.Deserialize<User>(firstDocument));
         }
         public static void Delete()
         {
@@ -137,14 +83,21 @@ namespace LineBot
             //     new BsonDocument { { "type", "exam" }, {"score", new BsonDocument { { "$lt", 60 }}}
             //});
             //collection.DeleteMany(deleteLowExamFilter);
-            var deleteFilter = Builders<User>.Filter.Eq("name", "User1");
-            _users.DeleteOne(deleteFilter);
+            var deleteFilter = Builders<USER>.Filter.Eq("name", "User1");
+            //_users.DeleteOne(deleteFilter);
+        }
+        public static void DeleteAll ()
+        {
+            _users.DeleteMany(Builders<USER>.Filter.Empty);
         }
         public static void Update()
         {
-            string[] classes1 = { "phys_A1", "math_B4" };
-            var filter = Builders<User>.Filter.Eq("name", "User3");
-            var update = Builders<User>.Update.Set("classes", classes1);
+            List<UserClass> classes = new List<UserClass>();
+            classes.Add(new UserClass("phys_A1"));
+            classes.Add(new UserClass("math_B4"));
+
+            var filter = Builders<USER>.Filter.Eq("Name", "User3");
+            var update = Builders<USER>.Update.Set("Classes", classes);
             _users.UpdateOne(filter, update);
             //var arrayFilter = Builders<User>.Filter.Eq("name", "User3")
             //                 & Builders<User>.Filter.Eq("scores.type", "quiz");

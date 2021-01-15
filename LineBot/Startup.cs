@@ -62,37 +62,17 @@ namespace LineBot
             {
                 
                 endpoints.MapControllers();
-                //endpoints.MapPost("/api/linebot", async context =>
-                //{
-                //    string ChannelAccessToken = "YuCo+fV3bAEAHkqI4FHvs0gYlPDlaASLoII49mCJfJFC9dbay5ij0M3p/7zn0Z65eVKhD7t0gGqAkBRlg8BcyFZXVDcUDxFNg8f2bAkmLjU2yM37ZvU8UZ9/OcVAaK0C6kP4pss/vb0spdnDREJ/KwdB04t89/1O/w1cDnyilFU=";
-                //    //context.Request.EnableBuffering();
-
-                //    var bodyReader = new StreamReader(stream: context.Request.Body,
-                //                                                encoding: Encoding.UTF8,
-                //                                                detectEncodingFromByteOrderMarks: false,
-                //                                                bufferSize: 1024,
-                //                                                leaveOpen: true);
-
-                //    //var body = bodyReader.ReadToEnd();
-
-                //    // 將 HTTP Request 的 Stream 起始位置歸零
-                //    //context.Request.Body.Position = 0;
-                //    //var ReceivedMessage = isRock.LineBot.Utility.Parsing(body);
-                //    //回覆訊息
-                //    string Message;
-                //    //Message = "你說了:" + ReceivedMessage.events[0].message.text;
-                //    Message = "Hello, world";
-                //    //回覆用戶
-                //    //isRock.LineBot.Utility.ReplyMessage(ReceivedMessage.events[0].replyToken, Message, ChannelAccessToken);
-                //    //回覆API OK
-                //    isRock.LineBot.Utility.PushMessage("Uee40dcf0ca8f874fe5c5b374edccd59b", Message, ChannelAccessToken);
-                //    await context.Response.WriteAsync("Hello World!");
-
-
-                //});
+                
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("Hello World!");
+                    
+                    UsersServicies _usersServicies = new UsersServicies();
+                    List<USER> users = _usersServicies.Get();
+                    string str = "";
+                    foreach (var data in users)
+                        str += data.info();
+                    
+                    await context.Response.WriteAsync(str);
                 });
             });
             

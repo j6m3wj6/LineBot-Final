@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace LineBot.Models
 {
-	public class Homework
+	public class HOMEWORK
 	{
 
 		[BsonId]
@@ -12,31 +12,31 @@ namespace LineBot.Models
 		public string Id { get; set; }
 
 		[BsonElement("homeworkId")]
-		public string homeworkId { get; set; }
+		public string HomeworkId { get; set; }
 
 		[BsonElement("title")]
-		public string title { get; set; }
+		public string Title { get; set; }
 
 		[BsonElement("description")]
-		public string description { get; set; }
+		public string Description { get; set; }
 
 		[BsonElement("tags")]
-		public string tags { get; set; }
+		public string[] Tags { get; set; }
 
 		[BsonElement("startTime")]
-		public string startTime { get; set; }
+		public string StartTime { get; set; }
 
 		[BsonElement("dueTime")]
-		public string dueTime { get; set; }
+		public string DueTime { get; set; }
 
 		[BsonElement("classId")]
-		public string classId { get; set; }
+		public string ClassId { get; set; }
 
 		[BsonElement("answers")]
-		public string answers { get; set; }
+		public string Answers { get; set; }
 
-		[BsonElement("hangingStatus")]
-		public string hangingStatus { get; set; }
+		//[BsonElement("hangingStatus")]
+		//public string HangingStatus { get; set; }
 
 	}
 }
