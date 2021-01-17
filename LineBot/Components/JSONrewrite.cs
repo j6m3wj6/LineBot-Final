@@ -64,15 +64,33 @@ namespace LineBot.Components
         }
         public string Test()
         {
+          
+            
             dynamic jsonObj = Newtonsoft.Json.JsonConvert.DeserializeObject(JsonTemplate.Test);
-            dynamic jsonObj_push = Newtonsoft.Json.JsonConvert.DeserializeObject(JsonTemplate.Json);
+            //dynamic jsonObj_push = Newtonsoft.Json.JsonConvert.DeserializeObject(JsonTemplate.Json);
             //Console.WriteLine(jsonObj);
             //Console.WriteLine(jsonObj.body["contents"]);
-            Console.WriteLine(jsonObj_push);
-            Console.WriteLine(jsonObj_push[0]["contents"]);
-            jsonObj_push[0]["contents"].Append(jsonObj);
-            string output = Newtonsoft.Json.JsonConvert.SerializeObject(jsonObj_push, Newtonsoft.Json.Formatting.Indented);
+            //Console.WriteLine(jsonObj_push);
+            //Console.WriteLine(jsonObj_push[0]["contents"]);
+            //JArray array = new JArray();
+            //array.Add(jsonObj);
+            //jsonObj_push[0]["contents"] = array;
+            //Console.WriteLine(jsonObj_push);
 
+            var result = new[]
+            {
+                new {
+                    type = "flex",
+                    altText = "This is a Flex Message",
+                    contents = jsonObj ,
+                }
+            };
+
+            //JArray BigArray = new JArray();
+            //BigArray.Add(jsonObj_push);
+            string output = Newtonsoft.Json.JsonConvert.SerializeObject(result);
+
+            Console.WriteLine(output);
 
             return output;
         }

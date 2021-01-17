@@ -27,7 +27,7 @@ namespace LineBot.Controllers
         {
             this.license = DateTime.Now;
             this.state = 0;
-            this.module = "home";
+            this.module = "firstLogin";
             this.userInput = new List<string>();
         }
         public BOT(string userId, string ChannelAccessToken) : base(ChannelAccessToken)
@@ -54,7 +54,7 @@ namespace LineBot.Controllers
             this.license = DateTime.Now;
             this.state = 0;
             this.module = "home";
-            this.userInput = new List<string>();
+            this.userInput.Clear();
         }
         //public async string testAsync ()
         //{
@@ -68,7 +68,7 @@ namespace LineBot.Controllers
     [Produces("application/json")]
     public class LineChatController : ControllerBase
     {
-        static string ChannelAccessToken = "YuCo+fV3bAEAHkqI4FHvs0gYlPDlaASLoII49mCJfJFC9dbay5ij0M3p/7zn0Z65eVKhD7t0gGqAkBRlg8BcyFZXVDcUDxFNg8f2bAkmLjU2yM37ZvU8UZ9/OcVAaK0C6kP4pss/vb0spdnDREJ/KwdB04t89/1O/w1cDnyilFU=";
+        static string ChannelAccessToken = "p9hJDxgsiPr5L1l7mIaersSPu9uUvymNW2pSUGQEno6eUZ7GKqSH0vxTEjvLMH3WBpGixeNMlRWsjjHxVm0TZbiFYR3AeyeQbZ7LRoRh1dgy6oE1E2gZj30RMns4FkJknga38ubqu7PhjQDMlTG3zQdB04t89/1O/w1cDnyilFU=";
         static string AdminUserId = "Uee40dcf0ca8f874fe5c5b374edccd59b";
         //static isRock.LineBot.Bot bot = new isRock.LineBot.Bot(ChannelAccessToken);
         static List<BOT> botPool = new List<BOT>();
@@ -86,10 +86,7 @@ namespace LineBot.Controllers
         [HttpPost]
         public async Task<IActionResult> Post()
         {
-            //取得 http Post RawData(should be JSON)
-            //Console.WriteLine("Request.Body", Request.HttpContext);
-            
-            
+            //Read Http post request bit stream
             var body = "";
             using (var bodyReader = new StreamReader(stream: Request.Body,
                                                       encoding: Encoding.UTF8,
@@ -97,10 +94,13 @@ namespace LineBot.Controllers
                                                       bufferSize: 1024
                                                       ))
             {
+
                 body = await bodyReader.ReadToEndAsync();
                 var ReceivedMessage = isRock.LineBot.Utility.Parsing(body);
                 var ev = ReceivedMessage.events[0];
                 var userId = ev.source.userId;
+                //bot.PushMessage(userId, $"bot for user {userId}, {bot.module}");
+
                 var bot = botPool.Find(b => b.userId == userId);
 
                 try
@@ -110,32 +110,35 @@ namespace LineBot.Controllers
                         bot = new BOT(userId, ChannelAccessToken);
                         botPool.Add(bot);
                         bot.PushMessage(userId, $"New user");
-
                     }
                     bot.CheckLicence();
 
                     if (ev.type == "postback")
                     {
-                        //isRock.LineBot.Utility.ReplyMessage(ev.replyToken, "postback", ChannelAccessToken);
+                        //Set the bot module according to postback event (options on the richMenu)
                         var queryStr = QueryHelpers.ParseQuery(ev.postback.data);
-                        if (queryStr["action"].ToString() == "handInHomework")
-                        {
-                            bot.module = "handInHomework";
-                        }
+                        bot.module = queryStr["action"].ToString();
                     } 
                     switch (bot.module)
                     {
                         case "handInHomework":
                             await _hwManager.HandIn(bot, ev);
                             break;
+                        case "scoreStatics":
+                            await _userManager.ScoreStatics(bot, ev);
+                            break;
                         case "firstLogin":
                             await _userManager.FillInfo(bot, ev);
                             break;
                         default:
                             JSONrewrite jSONrewrite = new JSONrewrite();
-                            jSONrewrite.Test();
-                            bot.PushMessage(userId, "hello");
-                            bot.PushMessage(userId, jSONrewrite.Test());
+                            //jSONrewrite.Test();
+                            //Utility.PushMessages(userId, jSONrewrite.Test(), ChannelAccessToken);
+                            //bot.PushMessageWithJSON(userId, "hello");
+                            //bot.PushMessageWithJSON(userId, jSONrewrite.Test());
+                            bot.PushMessageWithJSON(userId, FlexMessage.getFlex());
+
+                            //bot.PushMessage(userId, );
                             break;
                     }
                 }
@@ -180,61 +183,6 @@ namespace LineBot.Controllers
             //return RedirectToAction("Complete", new { id = 123 });
             return "redirect";
         }
-
-        //public void richMenu(string Token)
-        //{
-        //    //建立RuchMenu
-        //    var item1 = new isRock.LineBot.RichMenu.RichMenuItem();
-        //    //var item2 = new isRock.LineBot.RichMenu.RichMenuItem();
-        //    item1.name = "no name";
-        //    item1.chatBarText = "快捷選單A";
-        //    item1.selected = true;
-        //    //item2.name = "no name";
-        //    //item2.chatBarText = "快捷選單B";
-        //    //item2.selected = true;
-
-        //    //建立左上方按鈕區塊
-        //    var leftupButton = new isRock.LineBot.RichMenu.Area();
-        //    leftupButton.bounds.x = 0;
-        //    leftupButton.bounds.y = 0;
-        //    leftupButton.bounds.width = 1250;
-        //    leftupButton.bounds.height = 1686 / 2;
-        //    leftupButton.action = new MessageAction() { label = "左上", text = "我要交作業" };
-        //    //建立右上方按鈕區塊
-        //    var rightupButton = new isRock.LineBot.RichMenu.Area();
-        //    rightupButton.bounds.x = 1250;
-        //    rightupButton.bounds.y = 0;
-        //    rightupButton.bounds.width = 1250 + 1250;
-        //    rightupButton.bounds.height = 1686 / 2;
-        //    rightupButton.action = new MessageAction() { label = "右上", text = "請假" };
-        //    //建立左下方按鈕區塊
-        //    var leftdownButton = new isRock.LineBot.RichMenu.Area();
-        //    leftdownButton.bounds.x = 0;
-        //    leftdownButton.bounds.y = 1686 / 2;
-        //    leftdownButton.bounds.width = 1250;
-        //    leftdownButton.bounds.height = 1686 / 2;
-        //    leftdownButton.action = new MessageAction() { label = "左下", text = "補課" };
-        //    //建立右下方按鈕區塊
-        //    var rightdownButton = new isRock.LineBot.RichMenu.Area();
-        //    rightdownButton.bounds.x = 1250;
-        //    rightdownButton.bounds.y = 1686 / 2;
-        //    rightdownButton.bounds.width = 1250 + 1250;
-        //    rightdownButton.bounds.height = 1686 / 2;
-        //    rightdownButton.action = new MessageAction() { label = "右下", text = "成績查詢" };
-
-        //    //將area加入RichMenuItem
-        //    item1.areas.Add(leftupButton);
-        //    item1.areas.Add(rightupButton);
-        //    item1.areas.Add(rightdownButton);
-        //    item1.areas.Add(leftdownButton);
-
-        //    //建立Menu Item並綁定指定的圖片
-        //    var menu1 = isRock.LineBot.Utility.CreateRichMenu(
-        //        item1, new Uri("https://img.onl/uS9qJc"), ChannelAccessToken);
-        //    isRock.LineBot.Utility.SetDefaultRichMenu(menu1.richMenuId, ChannelAccessToken);
-
-
-        //}
     }
     
 

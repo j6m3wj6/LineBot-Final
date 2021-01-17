@@ -12,8 +12,8 @@ namespace LineBot
 {
     class LineBotBasic
     {
-        
-        static string ChannelAccessToken = "YuCo+fV3bAEAHkqI4FHvs0gYlPDlaASLoII49mCJfJFC9dbay5ij0M3p/7zn0Z65eVKhD7t0gGqAkBRlg8BcyFZXVDcUDxFNg8f2bAkmLjU2yM37ZvU8UZ9/OcVAaK0C6kP4pss/vb0spdnDREJ/KwdB04t89/1O/w1cDnyilFU=";
+        static string ChannelAccessToken = "p9hJDxgsiPr5L1l7mIaersSPu9uUvymNW2pSUGQEno6eUZ7GKqSH0vxTEjvLMH3WBpGixeNMlRWsjjHxVm0TZbiFYR3AeyeQbZ7LRoRh1dgy6oE1E2gZj30RMns4FkJknga38ubqu7PhjQDMlTG3zQdB04t89/1O/w1cDnyilFU=";
+
         static string AdminUserId = "Uee40dcf0ca8f874fe5c5b374edccd59b";
         static isRock.LineBot.Bot bot = new isRock.LineBot.Bot(ChannelAccessToken);
 
@@ -37,9 +37,9 @@ namespace LineBot
             //liffApp();
             //richMenu();
             */
-            //_hwServicies.DeleteAll();
-            //_userServicies.DeleteAll();
-            //_classServicies.DeleteAll();
+            _hwServicies.DeleteAll();
+            _userServicies.DeleteAll();
+            _classServicies.DeleteAll();
             CreatMockData();
 
             //List<USER> users = _classServicies.GetStudents("Math10_B2");
@@ -84,7 +84,7 @@ namespace LineBot
                     Answers = ans,
                 };
                 homeworks.Add(newHW);
-                hw1_id.Add($"hw10_0{i}");
+                hw1_id.Add($"hwMa10B2_0{i}");
                 bool status = false;
                 double score = 0;
                 Random rn = new Random();
@@ -121,7 +121,7 @@ namespace LineBot
                     Answers = ans,
                 };
                 homeworks.Add(newHW);
-                hw2_id.Add($"hw11_0{i}");
+                hw2_id.Add($"hwMa11A1_0{i}");
                 bool status = false;
                 double score = 0;
                 Random rn = new Random();
@@ -130,7 +130,7 @@ namespace LineBot
                     status = true;
                     score = rn.Next(MinValue, MaxValue);
                 }
-                userHw2.Add(new UserHomework($"hwMa10B2_0{i}", status, score));
+                userHw2.Add(new UserHomework($"hwMa11A1_0{i}", status, score));
             }
             var newClass2 = new CLASS
             {
@@ -160,7 +160,7 @@ namespace LineBot
                     Answers = ans,
                 };
                 homeworks.Add(newHW);
-                hw3_id.Add($"hw12_0{i}");
+                hw3_id.Add($"hwMa12A2_0{i}");
                 bool status = false;
                 double score = 0;
                 Random rn = new Random();
@@ -169,7 +169,7 @@ namespace LineBot
                     status = true;
                     score = rn.Next(MinValue, MaxValue);
                 }
-                userHw3.Add(new UserHomework($"hwMa10B2_0{i}", status, score));
+                userHw3.Add(new UserHomework($"hwMa12A2_0{i}", status, score));
             }
 
             var newClass3 = new CLASS
@@ -208,7 +208,7 @@ namespace LineBot
                     status = true;
                     score = rn.Next(MinValue, MaxValue);
                 }
-                userHw4.Add(new UserHomework($"hwMa10B2_0{i}", status, score));
+                userHw4.Add(new UserHomework($"hwEn11C3_0{i}", status, score));
             }
 
             var newClass4 = new CLASS

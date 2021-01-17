@@ -19,7 +19,7 @@ namespace LineBot.App
         static HomeworkServicies _hwServicies = new HomeworkServicies();
         static UsersServicies _userServicies = new UsersServicies();
         static ClassServicies _classServicies = new ClassServicies();
-        static string ChannelAccessToken = "YuCo+fV3bAEAHkqI4FHvs0gYlPDlaASLoII49mCJfJFC9dbay5ij0M3p/7zn0Z65eVKhD7t0gGqAkBRlg8BcyFZXVDcUDxFNg8f2bAkmLjU2yM37ZvU8UZ9/OcVAaK0C6kP4pss/vb0spdnDREJ/KwdB04t89/1O/w1cDnyilFU=";
+        //static string ChannelAccessToken = "p9hJDxgsiPr5L1l7mIaersSPu9uUvymNW2pSUGQEno6eUZ7GKqSH0vxTEjvLMH3WBpGixeNMlRWsjjHxVm0TZbiFYR3AeyeQbZ7LRoRh1dgy6oE1E2gZj30RMns4FkJknga38ubqu7PhjQDMlTG3zQdB04t89/1O/w1cDnyilFU=";
 
         public HomeworkManager()
         {
@@ -32,48 +32,65 @@ namespace LineBot.App
             bot.UpdateLicence();
             try
             {
+                //if (bot.userId != null) bot.state = 1; 
+                if (ev.type == "message" && ev.message.text == "/exit")
+                {
+                    bot.ResetState();
+                    return "";
+                }
                 switch (bot.state)
                 {
                     case (0):
                         bot.PushMessage(userId, "請問您的學號是?");
-                        bot.state++;
+                        bot.state++; //Next step
                         break;
                     case (1):
+                        //Check input fromat
                         if (!CheckInput("studentId", ev.message.text))
                             bot.PushMessage(userId, "錯誤格式: 請重新輸入學號");
                         else
                         {
-                            bot.userInput.Add(ev.message.text);
-                            ButtonsTemplate ButtonsTemplateMsg = GetUndoHW(ev.message.text);
+                            //Save user's input (studentId)
+                            ButtonsTemplate ButtonsTemplateMsg;
+                            //if (bot.userId != null)
+                            //    ButtonsTemplateMsg = GetUndoHW(bot.userId);
+                            //else
+                            //{
+                                bot.userInput.Add(ev.message.text);
+                                ButtonsTemplateMsg = GetUndoHW(ev.message.text);
+                            //}
+                            //Find user's undoHW
                             bot.PushMessage(userId, ButtonsTemplateMsg);
-                            bot.state++;
+                            bot.state++; //Next step
                         }
                         break;
                     case (2):
-                        //put into list
+                        //Save user's input (homeworkId) - from ButtonsTemplateMsg
                         bot.userInput.Add(ev.message.text);
                         bot.PushMessage(userId, $"開始繳交{ev.message.text}\n請問您1-5題答案是?");
-                        bot.state++;
+                        bot.state++; //Next step
                         break;
                     case (3):
-                        //checkInput
+                        //Check input fromat
                         if (!CheckInput("answer", ev.message.text))
-                                bot.PushMessage(userId, $"錯誤格式: 請重新輸入1-5題答案");
+                            bot.PushMessage(userId, $"錯誤格式: 請重新輸入1-5題答案");
                         else
                         {
+                            //Save user's input (user's answer for question 1~5)
                             bot.userInput.Add(ev.message.text);
                             bot.PushMessage(userId, "請問您6-10題答案是?");
-                            bot.state++;
+                            bot.state++; //Next step
                         }
                         break;
                     case (4):
-                        //checkInput
+                        //Check input fromat
                         if (!CheckInput("answer", ev.message.text))
                             bot.PushMessage(userId, $"錯誤格式: 請重新輸入6-10題答案");
                         else
                         {
+                            //Save user's input (user's answer for question 1~5)
                             bot.userInput.Add(ev.message.text);
-                            //Compare with the answer
+                            //Compare with the correct answer in MongoDB, get the result
                             string resJson = CompareWithAnswer(bot);
                             dynamic resObj = JsonConvert.DeserializeObject(resJson);
                             string mes = $"結束作答！\n" +
@@ -84,9 +101,14 @@ namespace LineBot.App
                                 $"分數：{resObj.score}\n" +
                                 $"錯誤率：{resObj.errorRate}\n";
                             bot.PushMessage(userId, mes);
-                            UpdateScore(bot.userInput[0], bot.userInput[1], resObj.score);
-                            bot.state = 0;
-                            bot.module = "home";
+
+                            //Update User's score and status in MongoDB
+                            string stuId = bot.userInput[0];
+                            string hwId = bot.userInput[1];
+                            double score = resObj.score;
+                            UpdateScore(stuId, hwId, score);
+
+                            bot.ResetState(); //End HandIn process
                         }
                         break;
                     default:
@@ -100,16 +122,25 @@ namespace LineBot.App
             }
             return "HandInHomeWorkManager";
         }
-        static public void UpdateScore(string studentId, string homeworkId, double score)
-        {
-            _userServicies.UpdateScore(studentId, homeworkId, score);
-        }
 
+        public string UpdateScore(string studentId, string homeworkId, double score)
+        {
+            return _userServicies.UpdateScore(studentId, homeworkId, score);
+        }
 
         static public ButtonsTemplate GetUndoHW(string studentId)
         {
-            List<HOMEWORK> undoHWs = JsonConvert.DeserializeObject<List<HOMEWORK>>(_userServicies.GetUnDueHW(studentId));
+
+            List<HOMEWORK> undoHWs = new List<HOMEWORK>();
+            undoHWs = JsonConvert.DeserializeObject<List<HOMEWORK>>(_userServicies.GetUnDoHW(studentId));
+
             var actions = new List<TemplateActionBase>();
+            foreach (HOMEWORK hw in undoHWs)
+            {
+                actions.Add(new MessageAction() { label = hw.Title, text = hw.HomeworkId });
+                if (actions.Count() == 3) break;
+            }
+
             ButtonsTemplate ButtonsTemplateMsg;
             if (undoHWs.Count() == 0)
             {
@@ -119,7 +150,6 @@ namespace LineBot.App
                     thumbnailImageUrl = new Uri("https://arock.blob.core.windows.net/blogdata201709/14-143030-1cd8cf1e-8f77-4652-9afa-605d27f20933.png"),
                     title = "您沒有未交的作業",
                     text = "",
-                    //actions = actions,
                 };
             }
             else
@@ -133,13 +163,10 @@ namespace LineBot.App
                     actions = actions,
                 };
             }
-            foreach (HOMEWORK hw in undoHWs)
-            {
-                actions.Add(new MessageAction() { label = hw.Title, text = hw.HomeworkId });
-            }
 
             return ButtonsTemplateMsg;
         }
+
         static public bool CheckInput(string dialogue, string input)
         {
             bool result = true;
@@ -159,7 +186,7 @@ namespace LineBot.App
         static public bool CheckStudentIdFormat(string input)
         {
             bool result = true;
-            if (!Regex.IsMatch(input, @"^stu_[1-4][0-9]*$"))
+            if (!Regex.IsMatch(input, @"^stu_[1-9][0-9]*$"))
             {
                 result = false;
             }

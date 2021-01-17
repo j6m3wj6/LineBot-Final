@@ -17,17 +17,6 @@ namespace LineBot.Components
             }
         ]";
 
-    //    [
-    //        {
-    //        ""type"": ""flex"",
-    //        ""altText"": ""This is a Flex Message"",
-    //        ""contents"": [
-    //                {
-
-    //                }
-    //            ]
-    //        }
-    //    ]
         public string Jsonstartgraph= @"{
                         ""type"": ""box"",
                         ""layout"": ""vertical"",
