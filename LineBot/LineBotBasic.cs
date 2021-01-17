@@ -37,9 +37,9 @@ namespace LineBot
             //liffApp();
             //richMenu();
             */
-            _hwServicies.DeleteAll();
-            _userServicies.DeleteAll();
-            _classServicies.DeleteAll();
+            //_hwServicies.DeleteAll();
+            //_userServicies.DeleteAll();
+            //_classServicies.DeleteAll();
             CreatMockData();
 
             //List<USER> users = _classServicies.GetStudents("Math10_B2");
@@ -48,7 +48,7 @@ namespace LineBot
             //{
             //    stu.info();
             //}
-            _userServicies.GetUnDueHW("stu_1");
+            //_userServicies.GetUnDueHW("stu_1");
             //_hwServicies.Due("hwMa10B2_01");
             //_hwServicies.Due("hwMa10B2_04");
 
@@ -58,11 +58,6 @@ namespace LineBot
             //UndoHW();
             Console.WriteLine("End of LineBotBasic");
             
-        }
-        public static List<HOMEWORK> UndoHW()
-        {
-            List<HOMEWORK> undoHWs = new List<HOMEWORK>();
-            return undoHWs;
         }
         public static void CreatMockData()
         {
@@ -91,7 +86,7 @@ namespace LineBot
                 homeworks.Add(newHW);
                 hw1_id.Add($"hw10_0{i}");
                 bool status = false;
-                float score = 0;
+                double score = 0;
                 Random rn = new Random();
                 if (DateTime.Compare(dueDate, DateTime.Now) < 0)
                 {
@@ -128,7 +123,7 @@ namespace LineBot
                 homeworks.Add(newHW);
                 hw2_id.Add($"hw11_0{i}");
                 bool status = false;
-                float score = 0;
+                double score = 0;
                 Random rn = new Random();
                 if (DateTime.Compare(dueDate, DateTime.Now) < 0)
                 {
@@ -167,7 +162,7 @@ namespace LineBot
                 homeworks.Add(newHW);
                 hw3_id.Add($"hw12_0{i}");
                 bool status = false;
-                float score = 0;
+                double score = 0;
                 Random rn = new Random();
                 if (DateTime.Compare(dueDate, DateTime.Now) < 0)
                 {
@@ -192,7 +187,7 @@ namespace LineBot
             {
                 DateTime startDate = new DateTime(2021, 1, i * 7, 0, 0, 0); //2020/01/01 00:00:00 AM
                 DateTime dueDate = startDate.AddDays(7);
-                char[] ans = { 'a', 'e', 'd', 'b', 'a', 'a', 'e', 'b', 'd', 'a' };
+                char[] ans = { 'a', 'e', 'd', 'c', 'c', 'a', 'e', 'b', 'd', 'a' };
 
                 var newHW = new HOMEWORK
                 {
@@ -206,7 +201,7 @@ namespace LineBot
                 homeworks.Add(newHW);
                 hw4_id.Add($"hwEn11C3_0{i}");
                 bool status = false;
-                float score = 0;
+                double score = 0;
                 Random rn = new Random();
                 if (DateTime.Compare(dueDate, DateTime.Now) < 0)
                 {

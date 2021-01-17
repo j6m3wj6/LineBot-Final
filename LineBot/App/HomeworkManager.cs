@@ -19,88 +19,94 @@ namespace LineBot.App
         static HomeworkServicies _hwServicies = new HomeworkServicies();
         static UsersServicies _userServicies = new UsersServicies();
         static ClassServicies _classServicies = new ClassServicies();
-
         static string ChannelAccessToken = "YuCo+fV3bAEAHkqI4FHvs0gYlPDlaASLoII49mCJfJFC9dbay5ij0M3p/7zn0Z65eVKhD7t0gGqAkBRlg8BcyFZXVDcUDxFNg8f2bAkmLjU2yM37ZvU8UZ9/OcVAaK0C6kP4pss/vb0spdnDREJ/KwdB04t89/1O/w1cDnyilFU=";
-        static string AdminUserId = "Uee40dcf0ca8f874fe5c5b374edccd59b";
 
         public HomeworkManager()
         {
+
         }
         public async Task<string> HandIn(BOT bot, Event ev)
         {
+            var userId = ev.source.userId;
+
             bot.UpdateLicence();
             try
             {
                 switch (bot.state)
                 {
                     case (0):
-                        isRock.LineBot.Utility.ReplyMessage(ev.replyToken, "請問您的學號是?", ChannelAccessToken);
+                        bot.PushMessage(userId, "請問您的學號是?");
                         bot.state++;
                         break;
                     case (1):
                         if (!CheckInput("studentId", ev.message.text))
-                            isRock.LineBot.Utility.ReplyMessage(ev.replyToken, $"錯誤格式: 請重新輸入學號", ChannelAccessToken);
+                            bot.PushMessage(userId, "錯誤格式: 請重新輸入學號");
                         else
                         {
                             bot.userInput.Add(ev.message.text);
                             ButtonsTemplate ButtonsTemplateMsg = GetUndoHW(ev.message.text);
-                            bot.PushMessage(AdminUserId, ButtonsTemplateMsg);
+                            bot.PushMessage(userId, ButtonsTemplateMsg);
                             bot.state++;
                         }
                         break;
                     case (2):
-                        //checkInput
-
+                        //put into list
                         bot.userInput.Add(ev.message.text);
-                        isRock.LineBot.Utility.ReplyMessage(ev.replyToken, $"開始繳交{ev.message.text}\n請問您1-5題答案是?", ChannelAccessToken);
+                        bot.PushMessage(userId, $"開始繳交{ev.message.text}\n請問您1-5題答案是?");
                         bot.state++;
                         break;
                     case (3):
                         //checkInput
                         if (!CheckInput("answer", ev.message.text))
-                            isRock.LineBot.Utility.ReplyMessage(ev.replyToken, $"錯誤格式: 請重新輸入1-5題答案", ChannelAccessToken);
+                                bot.PushMessage(userId, $"錯誤格式: 請重新輸入1-5題答案");
                         else
                         {
                             bot.userInput.Add(ev.message.text);
-                            isRock.LineBot.Utility.ReplyMessage(ev.replyToken, "請問您6-10題答案是?", ChannelAccessToken);
+                            bot.PushMessage(userId, "請問您6-10題答案是?");
                             bot.state++;
                         }
                         break;
                     case (4):
                         //checkInput
                         if (!CheckInput("answer", ev.message.text))
-                            isRock.LineBot.Utility.ReplyMessage(ev.replyToken, $"錯誤格式: 請重新輸入6-10題答案", ChannelAccessToken);
+                            bot.PushMessage(userId, $"錯誤格式: 請重新輸入6-10題答案");
                         else
                         {
                             bot.userInput.Add(ev.message.text);
                             //Compare with the answer
                             string resJson = CompareWithAnswer(bot);
                             dynamic resObj = JsonConvert.DeserializeObject(resJson);
-
-                            isRock.LineBot.Utility.ReplyMessage(ev.replyToken, $"結束作答: \n" +
-                                $"您輸入的答案： {resObj.userInput}\n" +
+                            string mes = $"結束作答！\n" +
+                                $"{resObj.hwTitle} ({resObj.hwId})\n" +
+                                $"---------\n" +
+                                $"您的答案： {resObj.userInput}\n" +
                                 $"正確答案： {resObj.answer}\n" +
                                 $"分數：{resObj.score}\n" +
-                                $"錯誤率：{resObj.errorRate}\n", ChannelAccessToken);
-
+                                $"錯誤率：{resObj.errorRate}\n";
+                            bot.PushMessage(userId, mes);
+                            UpdateScore(bot.userInput[0], bot.userInput[1], resObj.score);
                             bot.state = 0;
                             bot.module = "home";
                         }
                         break;
                     default:
-                        isRock.LineBot.Utility.ReplyMessage(ev.replyToken, "HandInHomeWorkManager", ChannelAccessToken);
+                        bot.PushMessage(userId, "HandInHomeWorkManager");
                         break;
                 }
             }
-            catch (HomeworkManagerException e)
+            catch (ExceptionManager e)
             {
                 throw e;
             }
-            //return RedirectToAction("Complete", new { id = 123 });
             return "HandInHomeWorkManager";
         }
+        static public void UpdateScore(string studentId, string homeworkId, double score)
+        {
+            _userServicies.UpdateScore(studentId, homeworkId, score);
+        }
 
-        public ButtonsTemplate GetUndoHW(string studentId)
+
+        static public ButtonsTemplate GetUndoHW(string studentId)
         {
             List<HOMEWORK> undoHWs = JsonConvert.DeserializeObject<List<HOMEWORK>>(_userServicies.GetUnDueHW(studentId));
             var actions = new List<TemplateActionBase>();
@@ -134,7 +140,7 @@ namespace LineBot.App
 
             return ButtonsTemplateMsg;
         }
-        public bool CheckInput(string dialogue, string input)
+        static public bool CheckInput(string dialogue, string input)
         {
             bool result = true;
             switch (dialogue)
@@ -150,7 +156,7 @@ namespace LineBot.App
             return result;
         }
 
-        public bool CheckStudentIdFormat(string input)
+        static public bool CheckStudentIdFormat(string input)
         {
             bool result = true;
             if (!Regex.IsMatch(input, @"^stu_[1-4][0-9]*$"))
@@ -160,7 +166,7 @@ namespace LineBot.App
             return result;
         }
 
-        public bool CheckAnswerFormat(string input)
+        static public bool CheckAnswerFormat(string input)
         {
             bool result = true;
             if (input.Length != 5) result = false;
@@ -171,7 +177,7 @@ namespace LineBot.App
             return result;
         }
 
-        public string CompareWithAnswer(BOT bot)
+        static public string CompareWithAnswer(BOT bot)
         {
 
             HOMEWORK hw = _hwServicies.Get(bot.userInput[1]);
@@ -179,7 +185,7 @@ namespace LineBot.App
             char[] student_ans = (bot.userInput[2]+bot.userInput[3]).ToArray();
 
             if (right_ans.Length != student_ans.Length)
-                throw new HomeworkManagerException("輸入題數與資料不符");
+                throw new ExceptionManager("HandIn", "輸入題數與資料不符");
             
             int error = 0; //錯誤題數
             //對答案 回傳錯誤率
@@ -190,6 +196,8 @@ namespace LineBot.App
             }
             var result = new
             {
+                hwTitle = hw.Title,
+                hwId = hw.HomeworkId,
                 answer = string.Join(" ", right_ans),
                 userInput = string.Join(" ", student_ans),
                 errorRate = error / Convert.ToDouble(right_ans.Length),
@@ -213,11 +221,5 @@ namespace LineBot.App
         //}
     }
 
-    class HomeworkManagerException : Exception
-    {
-        public HomeworkManagerException(string message)
-            : base(message)
-        {
-        }
-    }
+    
 }

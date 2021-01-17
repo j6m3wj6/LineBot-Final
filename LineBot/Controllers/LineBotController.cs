@@ -1,5 +1,6 @@
 ﻿using LineBot.Models;
 using LineBot.Repositories;
+using LineBot.Components;
 using LineBot.App;
 using isRock.LineBot;
 using System;
@@ -22,13 +23,19 @@ namespace LineBot.Controllers
         public string module { get; set; }
         public List<string> userInput { get; set; }
         public DateTime license { get; set; }
-
+        public BOT(string ChannelAccessToken) : base(ChannelAccessToken)
+        {
+            this.license = DateTime.Now;
+            this.state = 0;
+            this.module = "home";
+            this.userInput = new List<string>();
+        }
         public BOT(string userId, string ChannelAccessToken) : base(ChannelAccessToken)
         {
             this.userId = userId;
             this.license = DateTime.Now;
             this.state = 0;
-            this.module = "firstLogin";
+            this.module = "home";
             this.userInput = new List<string>();
         }
         public void CheckLicence()
@@ -94,28 +101,28 @@ namespace LineBot.Controllers
                 var ReceivedMessage = isRock.LineBot.Utility.Parsing(body);
                 var ev = ReceivedMessage.events[0];
                 var userId = ev.source.userId;
-
                 var bot = botPool.Find(b => b.userId == userId);
-                if (bot == null)
-                {
-                    bot = new BOT(userId, ChannelAccessToken);
-                    botPool.Add(bot);
-                }
-                bot.CheckLicence();
+
                 try
                 {
+                    if (bot == null)
+                    {
+                        bot = new BOT(userId, ChannelAccessToken);
+                        botPool.Add(bot);
+                        bot.PushMessage(userId, $"New user");
+
+                    }
+                    bot.CheckLicence();
+
                     if (ev.type == "postback")
                     {
                         //isRock.LineBot.Utility.ReplyMessage(ev.replyToken, "postback", ChannelAccessToken);
-
                         var queryStr = QueryHelpers.ParseQuery(ev.postback.data);
                         if (queryStr["action"].ToString() == "handInHomework")
                         {
                             bot.module = "handInHomework";
-                            //isRock.LineBot.Utility.ReplyMessage(ev.replyToken, "handInHomework", ChannelAccessToken);
                         }
-
-                    }
+                    } 
                     switch (bot.module)
                     {
                         case "handInHomework":
@@ -125,18 +132,31 @@ namespace LineBot.Controllers
                             await _userManager.FillInfo(bot, ev);
                             break;
                         default:
-                            isRock.LineBot.Utility.ReplyMessage(ev.replyToken, "hello", ChannelAccessToken);
+                            JSONrewrite jSONrewrite = new JSONrewrite();
+                            jSONrewrite.Test();
+                            bot.PushMessage(userId, "hello");
+                            bot.PushMessage(userId, jSONrewrite.Test());
                             break;
                     }
                 }
-                catch (HomeworkManagerException hwE)
+                catch (ExceptionManager hwE)
                 {
-                    isRock.LineBot.Utility.ReplyMessage(ev.replyToken, hwE.Message, ChannelAccessToken);
+                    bot.PushMessage(userId, $"執行錯誤\n" +
+                        $"--------\n" +
+                        $"Module: {hwE.module}\n" +
+                        $"Message: {hwE.Message}");
                     bot.ResetState();
                 }
-                catch
+                catch (Exception e)
                 {
-                    isRock.LineBot.Utility.ReplyMessage(ev.replyToken, "error", ChannelAccessToken);
+                    bot.PushMessage(userId, $"執行錯誤\n" +
+                        $"--------\n" +
+                        $"Module: unknown\n" +
+                        $"Source: {e.Source}\n" +
+                        $"ExceptionType:\n {e.Data}\n" +
+                        $"Message: {e.ToString()}");
+                    bot.PushMessage(userId, $"請重新操作一次\n");
+
                     bot.ResetState();
                 }
                 return Ok();

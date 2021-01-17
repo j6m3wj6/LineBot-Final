@@ -20,7 +20,7 @@ namespace LineBot.App
         static ClassServicies _classServicies = new ClassServicies();
 
         static string ChannelAccessToken = "YuCo+fV3bAEAHkqI4FHvs0gYlPDlaASLoII49mCJfJFC9dbay5ij0M3p/7zn0Z65eVKhD7t0gGqAkBRlg8BcyFZXVDcUDxFNg8f2bAkmLjU2yM37ZvU8UZ9/OcVAaK0C6kP4pss/vb0spdnDREJ/KwdB04t89/1O/w1cDnyilFU=";
-        static string AdminUserId = "Uee40dcf0ca8f874fe5c5b374edccd59b";
+        //static string AdminUserId = "Uee40dcf0ca8f874fe5c5b374edccd59b";
 
         public UserManager()
         {

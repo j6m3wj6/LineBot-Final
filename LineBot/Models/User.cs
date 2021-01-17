@@ -12,7 +12,7 @@ namespace LineBot.Models
 	{
         public string HomewoerkId { get; set; }
         public Boolean Status { get; set; }
-		public float Score { get; set; }
+		public double Score { get; set; }
 
 		public UserHomework(string homewoerkId, Boolean status)
 		{
@@ -20,13 +20,13 @@ namespace LineBot.Models
 			this.Status = status;
 			this.Score = 0;
 		}
-		public UserHomework(string homewoerkId, Boolean status, float score)
+		public UserHomework(string homewoerkId, Boolean status, double score)
 		{
 			this.HomewoerkId = homewoerkId;
 			this.Status = status;
 			this.Score = score;
 		}
-		public void SetScore(float score)
+		public void SetScore(double score)
         {
 			this.Score = score;
 		}
@@ -93,20 +93,6 @@ namespace LineBot.Models
 			PropertyInfo[] props = this.GetType().GetProperties();
 
 			var values = props.Select(s => s.GetValue(this, null)).ToList();
-            //foreach (PropertyInfo prop in props)
-            //{
-            //             if (prop.Name == "Classes")
-            //             {
-            //		List<UserClass> useClasses = prop.GetValue(UserClass, null);
-
-            //		foreach (var it in prop.GetValue(UserClass, null))
-            //                 {
-
-            //                     Console.WriteLine($"{it.Name}: {prop.GetValue(this, null)}");
-            //                 }
-            //             }
-            //             Console.WriteLine($"{prop.Name}: {prop.GetValue(this, null)}");
-            //}
 
             var result = new
             {
@@ -126,3 +112,18 @@ namespace LineBot.Models
 	}
 	
 }
+
+//foreach (PropertyInfo prop in props)
+//{
+//             if (prop.Name == "Classes")
+//             {
+//		List<UserClass> useClasses = prop.GetValue(UserClass, null);
+
+//		foreach (var it in prop.GetValue(UserClass, null))
+//                 {
+
+//                     Console.WriteLine($"{it.Name}: {prop.GetValue(this, null)}");
+//                 }
+//             }
+//             Console.WriteLine($"{prop.Name}: {prop.GetValue(this, null)}");
+//}
