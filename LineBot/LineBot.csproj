@@ -15,5 +15,7 @@
     <Folder Include="Middlewares\" />
     <Folder Include="Models\" />
     <Folder Include="Repositories\" />
+    <Folder Include="Components\" />
+    <Folder Include="App\" />
   </ItemGroup>
 </Project>

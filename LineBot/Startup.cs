@@ -65,14 +65,7 @@ namespace LineBot
                 
                 endpoints.MapGet("/", async context =>
                 {
-                    
-                    UsersServicies _usersServicies = new UsersServicies();
-                    List<USER> users = _usersServicies.Get();
-                    string str = "";
-                    foreach (var data in users)
-                        str += data.info();
-                    
-                    await context.Response.WriteAsync(str);
+                    await context.Response.WriteAsync("Hello World!");
                 });
             });
             

@@ -18,37 +18,32 @@ namespace LineBot.Controllers
     {
         static readonly UsersServicies _usersServicies = new UsersServicies();
 
-        //public UsersController(UsersServicies usersServicies)
-        //{
-        //    _usersServicies = usersServicies;
-        //}
-
-
-        [HttpGet] //List<BsonDocument> //_usersServicies.Get()
-        public ActionResult<String> Get()
+        [HttpGet] 
+        public ActionResult<string> Get()
         {
-            List<USER> users = _usersServicies.Get();
+            //List<USER> users = _usersServicies.Get();
+            USER user = _usersServicies.Get().FirstOrDefault();
             string str = "";
-            foreach (var data in users)
-                str += data.info();
+            //foreach (var data in users)
+            //    str += data.info();
 
-            return "test";
+            return user.info();
         }
-             
 
 
-        //[HttpGet("{id:length(24)}", Name = "GetBook")]
-        //public ActionResult<User> Get(string id)
-        //{
-        //    var user = _usersServicies.Get(id);
 
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpGet("{id:length(24)}", Name = "GetBook")]
+        public ActionResult<USER> Get(string id)
+        {
+            var user = _usersServicies.Get(id);
 
-        //    return user;
-        //}
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return user;
+        }
 
         //[HttpPost]
         //public ActionResult<User> Create(User user)

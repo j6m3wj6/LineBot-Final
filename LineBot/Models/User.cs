@@ -1,78 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Newtonsoft.Json;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace LineBot.Models
 {
-	public class UserHomework
+	public class UserHomework 
 	{
-		public string _id { get; set; }
-		public Boolean Status { get; set; }
+        public string HomewoerkId { get; set; }
+        public Boolean Status { get; set; }
 		public float Score { get; set; }
-		public string info()
-        {
-			string str = "";
-			str += _id;
-			str += ' ';
-			str += Status;
-			str += ' ';
-			str += Score;
-			str += '\n';
-			return str;
-		}
-		public UserHomework(Boolean status)
+
+		public UserHomework(string homewoerkId, Boolean status)
 		{
+			this.HomewoerkId = homewoerkId;
 			this.Status = status;
 			this.Score = 0;
 		}
-		public UserHomework(Boolean status, float score)
+		public UserHomework(string homewoerkId, Boolean status, float score)
 		{
+			this.HomewoerkId = homewoerkId;
 			this.Status = status;
+			this.Score = score;
+		}
+		public void SetScore(float score)
+        {
 			this.Score = score;
 		}
 	}
 
 	public class UserClass
     {
-		public string _id { get; set; }
+		public string ClassId { get; set; }
 		public string Name { get; set; }
 		public List<UserHomework> Homework { get; set; }
+		public UserClass()
+		{
+		}
 		public UserClass(string name)
 		{
 			this.Name = name;
 		}
-		public UserClass(List<UserHomework> hws)
+		public UserClass(string classId, string name)
 		{
-			this.Homework = hws;
+			this.Name = name;
+			this.ClassId = classId;
 		}
-
-		public string info()
+		public UserClass(string classId, string name, List<UserHomework> hws)
 		{
-			string str = "";
-			if (_id != null) str += _id;
-			str += ' ';
-			if (Name != null) str += Name;
-			str += ' ';
-			if (Homework != null)
-            {
-				str += "\nhomework: {\n";
-				foreach (UserHomework hw in Homework)
-				{
-					str += hw.info();
-				}
-				str += "}";
-			}
-			
-			str += "\n";
-			return str;
-
+			this.Name = name;
+			this.ClassId = classId;
+			this.Homework = hws;
 		}
 	}
 
-    public class USER
-    {
-        
+    public class USER 
+	{
+
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string _id { get; set; }
@@ -82,6 +69,10 @@ namespace LineBot.Models
         public string StudentId { get; set; }
         public string LineUserId { get; set; }
         public List<UserClass> Classes { get; set; }
+		public USER()
+		{
+
+		}
 		public USER(string name, string studentId)
 		{
 			this.Name = name;
@@ -98,84 +89,40 @@ namespace LineBot.Models
 
 		public string info()
         {
-			string str = "";
-			str += this.Name;
-			str += ' ';
-			str += this.StudentId;
-			str += ' ';
-			//str += this.LineUserId;
 			
-			if (Classes != null)
-            {
-				str += " \n classes = { \n";
-				foreach (UserClass cla in Classes)
-				{
-					str += cla.info();
-				}
-				str += "} ";
-			}
-            
-            str += "\n";
+			PropertyInfo[] props = this.GetType().GetProperties();
 
-            Console.WriteLine(str);
-			return str;
+			var values = props.Select(s => s.GetValue(this, null)).ToList();
+            //foreach (PropertyInfo prop in props)
+            //{
+            //             if (prop.Name == "Classes")
+            //             {
+            //		List<UserClass> useClasses = prop.GetValue(UserClass, null);
+
+            //		foreach (var it in prop.GetValue(UserClass, null))
+            //                 {
+
+            //                     Console.WriteLine($"{it.Name}: {prop.GetValue(this, null)}");
+            //                 }
+            //             }
+            //             Console.WriteLine($"{prop.Name}: {prop.GetValue(this, null)}");
+            //}
+
+            var result = new
+            {
+                Name = this.Name,
+                StudentId = this.StudentId,
+                LineUserId = this.LineUserId,
+                Classes = from s in this.Classes
+                          select s
+            };
+            string strJson = JsonConvert.SerializeObject(this);
+
+            Console.WriteLine($"info {strJson}");
+
+            return "";
         }
 		
 	}
 	
 }
-
-/*
-public void SerializeClasses ()
-		{
-			var root = new BsonDocument() { { "class", new BsonDocument() } };
-			foreach (var info in this.Classes)
-			{
-				if (string.IsNullOrWhiteSpace(Class.Definition.TagName))
-				{
-					continue;
-				}
-				root["nutrients"][nutrient.Definition.TagName] =
-				  new BsonDocument() {
-					{"id", nutrient.NutrientId},
-					{"amount", nutrient.AmountInHundredGrams},
-					{"description", nutrient.Definition.Description},
-					{"uom", nutrient.Definition.UnitOfMeasure},
-					{"sortOrder", nutrient.Definition.SortOrder}
-				  };
-			}
-			this.Classes = root;
-		}
-
-//Users
-{
-		_id: ObjectId(5fe5e89fb7b18070d8d18a5d),
-		name: STRING,
-		studentId: STRING,
-		lineUserId: STRING,
-		
-		classes: [
-				(classesId1): {
-						homeWork: {
-								(homeWorkId1): [BOOLEAN, FLOAT],
-								(homeWorkId2): [BOOLEAN, FLOAT],
-								...
-						}
-				},
-				(classesId2): {
-						homeWork: {
-								(homeWorkId3): [BOOLEAN, FLOAT],
-								(homeWorkId4): [BOOLEAN, FLOAT],
-								...
-						}
-				}
-	],
-
-	class: [...(classId)],
-	homeWork: {
-		(homeWorkId1): [BOOLEAN, FLOAT], //[finished, score]
-		(homeWorkId2): [BOOLEAN, FLOAT],
-		...
-	}
-}
-*/

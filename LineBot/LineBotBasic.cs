@@ -1,5 +1,6 @@
 ﻿using isRock.LineBot;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using LineBot.Models;
 using LineBot.Repositories;
@@ -9,8 +10,9 @@ using MongoDB.Bson;
 
 namespace LineBot
 {
-    public class LineBotBasic
+    class LineBotBasic
     {
+        
         static string ChannelAccessToken = "YuCo+fV3bAEAHkqI4FHvs0gYlPDlaASLoII49mCJfJFC9dbay5ij0M3p/7zn0Z65eVKhD7t0gGqAkBRlg8BcyFZXVDcUDxFNg8f2bAkmLjU2yM37ZvU8UZ9/OcVAaK0C6kP4pss/vb0spdnDREJ/KwdB04t89/1O/w1cDnyilFU=";
         static string AdminUserId = "Uee40dcf0ca8f874fe5c5b374edccd59b";
         static isRock.LineBot.Bot bot = new isRock.LineBot.Bot(ChannelAccessToken);
@@ -19,6 +21,9 @@ namespace LineBot
         static IMongoDatabase database = client.GetDatabase("LineBotCramSchool");
         static IMongoCollection<USER> _users = database.GetCollection<USER>("Users");
 
+        static HomeworkServicies _hwServicies = new HomeworkServicies();
+        static UsersServicies _userServicies = new UsersServicies();
+        static ClassServicies _classServicies = new ClassServicies();
         public static void main()
         {
             /*
@@ -32,42 +37,263 @@ namespace LineBot
             //liffApp();
             //richMenu();
             */
+            _hwServicies.DeleteAll();
+            _userServicies.DeleteAll();
+            _classServicies.DeleteAll();
+            CreatMockData();
+
+            //List<USER> users = _classServicies.GetStudents("Math10_B2");
+
+            //foreach (USER stu in users)
+            //{
+            //    stu.info();
+            //}
+            _userServicies.GetUnDueHW("stu_1");
+            //_hwServicies.Due("hwMa10B2_01");
+            //_hwServicies.Due("hwMa10B2_04");
 
 
             //Create();
-            Receive();
-            //DeleteAll();
-            Update();
-
+            //Receive();
+            //UndoHW();
             Console.WriteLine("End of LineBotBasic");
             
         }
+        public static List<HOMEWORK> UndoHW()
+        {
+            List<HOMEWORK> undoHWs = new List<HOMEWORK>();
+            return undoHWs;
+        }
+        public static void CreatMockData()
+        {
+            //Class: Math10_B2, Math11_A1, Math12_A2, English11_C3
+            List<CLASS> classes = new List<CLASS>();
+            List<HOMEWORK> homeworks = new List<HOMEWORK>();
+            int MinValue = 40;
+            int MaxValue = 100;
+
+            List<string> hw1_id = new List<string>();
+            List<UserHomework> userHw1 = new List<UserHomework>();
+            for (var i = 1; i < 5; i++)
+            {
+                DateTime startDate = new DateTime(2021, 1, i * 7, 0, 0, 0); //2020/01/01 00:00:00 AM
+                DateTime dueDate = startDate.AddDays(7);
+                char[] ans = { 'a', 'b', 'a', 'a', 'b', 'd', 'e', 'd', 'e', 'a' };
+                var newHW = new HOMEWORK
+                {
+                    HomeworkId = $"hwMa10B2_0{i}",
+                    Title = $"高一數學第{i}單元",
+                    ClassId = "Math10_B2",
+                    StartTime = startDate,
+                    DueTime = dueDate,
+                    Answers = ans,
+                };
+                homeworks.Add(newHW);
+                hw1_id.Add($"hw10_0{i}");
+                bool status = false;
+                float score = 0;
+                Random rn = new Random();
+                if (DateTime.Compare(dueDate, DateTime.Now) < 0)
+                {
+                    status = true;
+                    score = rn.Next(MinValue, MaxValue);
+                }
+                userHw1.Add(new UserHomework($"hwMa10B2_0{i}", status, score));
+            }
+            //string hw1_id_Json = JsonConvert.SerializeObject(hw1_id);
+            var newClass1 = new CLASS
+            {
+                ClassId = "Math10_B2",
+                Name = "高一數學",
+                Teacher = "陳建宏",
+                Homework = hw1_id,
+            };
+            List<HOMEWORK> hw2 = new List<HOMEWORK>();
+            List<string> hw2_id = new List<string>();
+            List<UserHomework> userHw2 = new List<UserHomework>();
+            for (var i = 1; i < 5; i++)
+            {
+                DateTime startDate = new DateTime(2021, 1, i * 7, 0, 0, 0); //2020/01/01 00:00:00 AM
+                DateTime dueDate = startDate.AddDays(7);
+                char[] ans = { 'a', 'b', 'd', 'e', 'd', 'b', 'a', 'a', 'e', 'a' };
+                var newHW = new HOMEWORK
+                {
+                    HomeworkId = $"hwMa11A1_0{i}",
+                    Title = $"高二數學第{i}單元",
+                    ClassId = "Math11_A1",
+                    StartTime = startDate,
+                    DueTime = dueDate,
+                    Answers = ans,
+                };
+                homeworks.Add(newHW);
+                hw2_id.Add($"hw11_0{i}");
+                bool status = false;
+                float score = 0;
+                Random rn = new Random();
+                if (DateTime.Compare(dueDate, DateTime.Now) < 0)
+                {
+                    status = true;
+                    score = rn.Next(MinValue, MaxValue);
+                }
+                userHw2.Add(new UserHomework($"hwMa10B2_0{i}", status, score));
+            }
+            var newClass2 = new CLASS
+            {
+                ClassId = $"Math11_A1",
+                Name = "高二數學",
+                Teacher = "高偉",
+                Homework = hw2_id,
+            };
+
+            List<HOMEWORK> hw3 = new List<HOMEWORK>();
+            List<string> hw3_id = new List<string>();
+            List<UserHomework> userHw3 = new List<UserHomework>();
+
+            for (var i = 1; i < 5; i++)
+            {
+                DateTime startDate = new DateTime(2021, 1, i * 7, 0, 0, 0); //2020/01/01 00:00:00 AM
+                DateTime dueDate = startDate.AddDays(7);
+                char[] ans = { 'a',  'e', 'd', 'b', 'a', 'a', 'e', 'b', 'd', 'a' };
+
+                var newHW = new HOMEWORK
+                {
+                    HomeworkId = $"hwMa12A2_0{i}",
+                    Title = $"高三數學第{i}單元",
+                    ClassId = "Math12_A2",
+                    StartTime = startDate,
+                    DueTime = dueDate,
+                    Answers = ans,
+                };
+                homeworks.Add(newHW);
+                hw3_id.Add($"hw12_0{i}");
+                bool status = false;
+                float score = 0;
+                Random rn = new Random();
+                if (DateTime.Compare(dueDate, DateTime.Now) < 0)
+                {
+                    status = true;
+                    score = rn.Next(MinValue, MaxValue);
+                }
+                userHw3.Add(new UserHomework($"hwMa10B2_0{i}", status, score));
+            }
+
+            var newClass3 = new CLASS
+            {
+                ClassId = $"Math12_A2",
+                Name = "高三數學",
+                Teacher = "陳立",
+                Homework = hw3_id,
+            };
+
+            List<HOMEWORK> hw4 = new List<HOMEWORK>();
+            List<string> hw4_id = new List<string>();
+            List<UserHomework> userHw4 = new List<UserHomework>();
+            for (var i = 1; i < 5; i++)
+            {
+                DateTime startDate = new DateTime(2021, 1, i * 7, 0, 0, 0); //2020/01/01 00:00:00 AM
+                DateTime dueDate = startDate.AddDays(7);
+                char[] ans = { 'a', 'e', 'd', 'b', 'a', 'a', 'e', 'b', 'd', 'a' };
+
+                var newHW = new HOMEWORK
+                {
+                    HomeworkId = $"hwEn11C3_0{i}",
+                    Title = $"高三英文第{i}單元",
+                    ClassId = "English11_C3",
+                    StartTime = startDate,
+                    DueTime = dueDate,
+                    Answers = ans,
+                };
+                homeworks.Add(newHW);
+                hw4_id.Add($"hwEn11C3_0{i}");
+                bool status = false;
+                float score = 0;
+                Random rn = new Random();
+                if (DateTime.Compare(dueDate, DateTime.Now) < 0)
+                {
+                    status = true;
+                    score = rn.Next(MinValue, MaxValue);
+                }
+                userHw4.Add(new UserHomework($"hwMa10B2_0{i}", status, score));
+            }
+
+            var newClass4 = new CLASS
+            {
+                ClassId = "English11_C3",
+                Name = "高三英文",
+                Teacher = "徐薇",
+                Homework = hw4_id,
+            };
+            classes.Add(newClass1);
+            classes.Add(newClass2);
+            classes.Add(newClass3);
+            classes.Add(newClass4);
+
+            _classServicies.CreateMany(classes);
+
+            List<USER> users = new List<USER>();
+            for (var i = 1; i < 50; i++)
+            {
+                List<UserClass> userCls = new List<UserClass>();
+                Random random = new Random();
+                int randomInt = random.Next();
+                if (randomInt % 3 == 0)
+                {
+                    userCls.Add(new UserClass("Math10_B2", "高一數學", userHw1));
+                }
+
+                else if (randomInt % 3 == 2)
+                {
+                    userCls.Add(new UserClass("Math11_A1", "高二數學", userHw2));
+                    userCls.Add(new UserClass("English11_C3", "高二英文", userHw4));
+                }
+                else
+                {
+                    userCls.Add(new UserClass("Math12_A2", "高三數學", userHw3));
+                }
+                var newUser = new USER
+                {
+                    StudentId = $"stu_{i}",
+                    Name = $"user{i}",
+                    Classes = userCls,
+                };
+                users.Add(newUser);
+                foreach (var cls in userCls)
+                {
+                    _classServicies.AddStudent(cls.ClassId, $"stu_{i}");
+                }
+            }
+
+            _hwServicies.CreateMany(homeworks);
+            _userServicies.CreateMany(users);
+
+        }
+
         public static void Create()
         {
 
-            string[] classes1 = { "phys_A1", "math_B4" };
-            string[] classes2 = { "phys_A1", "engilsh_C2" };
+            //List<USER> data = new List<USER>();
 
-            var newUser1 = new USER("User1", "stu_001");
-            var newUser2 = new USER("User2", "stu_002");
-            var newUser3 = new USER("User3", "stu_003");
+            //var newUser = new USER
+            //{
+            //    Name = "User1",
+            //    StudentId = "stu_001",
+            //    Classes = new List<UserClass>(),
+            //};
+            //var newUserClass = new UserClass
+            //{
+            //    Name = "phys_A1",
+            //};
+            //newUser.Classes.Add(newUserClass);
+            //data.Add(newUser);
 
-            //newUser1.info();
-
-            List<USER> data = new List<USER>();
-            data.Add(newUser1);
-            data.Add(newUser2);
-            data.Add(newUser3);
-            _users.InsertMany(data);
+            //_users.InsertMany(data);
         }
-
         public static void Receive()
         {
             List<USER> resData = new List<USER>();
             var cursor1 = _users.Find(user => true).ToCursor();
             foreach (var document in cursor1.ToEnumerable())
             {
-                Console.WriteLine(document);
                 resData.Add(document);
             }
             foreach (var data in resData)

@@ -1,66 +1,45 @@
 ﻿using System;
+using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace LineBot.Models
 {
-	public class HOMEWORK
+	class HOMEWORK 
 	{
-
 		[BsonId]
 		[BsonRepresentation(BsonType.ObjectId)]
-		public string Id { get; set; }
+        public string _id { get; set; }
 
-		[BsonElement("homeworkId")]
-		public string HomeworkId { get; set; }
+        public string HomeworkId { get; set; }
 
-		[BsonElement("title")]
-		public string Title { get; set; }
+        public string Title { get; set; }
 
-		[BsonElement("description")]
 		public string Description { get; set; }
 
-		[BsonElement("tags")]
 		public string[] Tags { get; set; }
 
-		[BsonElement("startTime")]
-		public string StartTime { get; set; }
+		public DateTime StartTime { get; set; }
 
-		[BsonElement("dueTime")]
-		public string DueTime { get; set; }
+		public DateTime DueTime { get; set; }
 
-		[BsonElement("classId")]
 		public string ClassId { get; set; }
 
-		[BsonElement("answers")]
-		public string Answers { get; set; }
-
-		//[BsonElement("hangingStatus")]
-		//public string HangingStatus { get; set; }
+		public char[] Answers { get; set; }
 
 	}
-}
-/*
-//Homework
-{
-	_id: ObjectId(5fe5e89fb7b18070d8d18a5d),
-	homeworkId: STRING,
-	title: STRING,
-	description: STRING,
-	tags: [STRING]
-	startTime: DATE,
-	dueTime: DATE,
 
-	classId: STRING,
-	answers: {
-		(questionId1): STRING,
-		(questionId2): STRING,
-	},
-	
-	hangingStatus: {
-		(studentId1): [BOOLEAN, FLOAT],
-		(studentId2): [BOOLEAN, FLOAT],
-		...
-	}
+
+	//List<HOMEWORK> hws = new List<HOMEWORK>();
+	//HOMEWORK newHW = new HOMEWORK
+	//{
+	//	HomeworkId = "hw1",
+	//	Title = "math1",
+	//	Description = "xxxxx",
+	//	ClassId = "math_A1",
+	//	Answers = { 'a','b','d','e','a', 'a', 'b', 'd', 'e', 'a' },
+
+	//};
+	//hws.Add(newHW);
 }
-*/
+
